@@ -1,0 +1,62 @@
+spatial-video-panes
+├── README.md
+├── index.html
+├── package-lock.json
+├── package.json
+├── pnpm-lock.yaml
+├── project-structure.txt
+├── src
+│   ├── components
+│   │   ├── BootScreen.tsx
+│   │   ├── CoreReactor.tsx
+│   │   ├── DebugOverlay.tsx
+│   │   ├── EncryptedChannel.tsx
+│   │   ├── HandSkeleton.tsx
+│   │   ├── NeuralLink.tsx
+│   │   ├── PaneEditor.tsx
+│   │   └── SimulationVault.tsx
+│   ├── constants
+│   │   └── index.ts
+│   ├── data
+│   │   └── landmarkStore.ts
+│   ├── engine
+│   │   ├── command
+│   │   │   ├── CommandEngine.ts
+│   │   │   └── CommandTypes.ts
+│   │   ├── core
+│   │   │   └── Engine.ts
+│   │   ├── intent
+│   │   │   ├── IntentEngine.ts
+│   │   │   └── IntentTypes.ts
+│   │   ├── renderer
+│   │   │   ├── RendererEngine.ts
+│   │   │   └── RendererTypes.ts
+│   │   ├── sensor
+│   │   │   ├── SensorEngine.ts
+│   │   │   └── SensorTypes.ts
+│   │   ├── spatial
+│   │   │   ├── SpatialEngine.ts
+│   │   │   └── SpatialTypes.ts
+│   │   └── types
+│   │       └── EngineTypes.ts
+│   ├── hooks
+│   │   └── useEngineStack.ts
+│   ├── main.tsx
+│   ├── shaders
+│   │   ├── composite.frag
+│   │   ├── crt.frag
+│   │   ├── glitch.frag
+│   │   ├── pane.vert
+│   │   ├── passthrough.frag
+│   │   ├── pinch_indicator.frag
+│   │   ├── pinch_indicator.vert
+│   │   ├── threshold.frag
+│   │   └── wireframe.frag
+│   ├── stores
+│   │   └── useUIStore.ts
+│   ├── styles
+│   │   └── index.css
+│   └── vite-env.d.ts
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts

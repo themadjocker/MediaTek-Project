@@ -1,0 +1,49 @@
+/* ─── Spatial Video Panes — Global CSS ─── */
+
+/* Google Fonts — @import MUST be the first statement in the file (CSS spec) */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  --cyber-red:      #FF003C;
+  --matrix-green:   #00FF41;
+  --neon-cyan:      #00F5FF;
+  --amber-warning:  #FFAB00;
+  --deep-purple:    #9D00FF;
+  --ghost-white:    #E8F0FE;
+  --dim-white:      #8A9BB5;
+  --bg-void:        #030508;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-void);
+}
+
+body {
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--ghost-white);
+}
+
+/* CRT scanline overlay — applied globally, GPU-cheap */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 65, 0.025) 0px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
