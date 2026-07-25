@@ -83,7 +83,7 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>()(
-  subscribeWithSelector((set, get) => ({
+  subscribeWithSelector((set) => ({
     bootPhase:    'BOOT_SCREEN',
     setBootPhase: (phase) => {
       set((s) => ({

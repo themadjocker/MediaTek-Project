@@ -23,6 +23,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      ripgrep:
+        specifier: ^0.3.1
+        version: 0.3.1
       three:
         specifier: ^0.168.0
         version: 0.168.0
@@ -833,6 +836,10 @@ packages:
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
+
+  ripgrep@0.3.1:
+    resolution: {integrity: sha512-6bDtNIBh1qPviVIU685/4uv0Ap5t8eS4wiJhy/tR2LdIeIey9CVasENlGS+ul3HnTmGANIp7AjnfsztsRmALfQ==}
+    hasBin: true
 
   rollup@4.62.2:
     resolution: {integrity: sha512-RFnrW4lhXA3s3eqHDZvN654g8OTjzRfqpIRJYczCGB6HzphckVAi/Qh4tbPUbRuDi7s1Llv8g/NspLkttY3gTA==}
@@ -1709,6 +1716,8 @@ snapshots:
       loose-envify: 1.4.0
 
   require-from-string@2.0.2: {}
+
+  ripgrep@0.3.1: {}
 
   rollup@4.62.2:
     dependencies:

@@ -5,7 +5,6 @@ import {
   selectPaneCount,
   selectDebugMode,
   selectBootPhase,
-  selectSignalLostAt,
   selectPanes,
   selectPinchConfirmedAt,
   selectSelectedPaneId,
