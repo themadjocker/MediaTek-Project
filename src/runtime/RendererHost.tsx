@@ -4,14 +4,14 @@ import * as THREE from 'three'
 
 import { useEngineRuntime } from './EngineRuntime'
 import type { IMaterialProvider } from '../engine/renderer/RendererTypes'
-import type { FrameContext } from '../engine/types/EngineTypes' // Added missing import
+import type { FrameContext } from '../engine/types/EngineTypes'
 
 class WireframeMaterialProvider implements IMaterialProvider {
     private material: THREE.MeshBasicMaterial
 
     constructor() {
         this.material = new THREE.MeshBasicMaterial({
-            color: 0x00ffff,     // Cyan
+            color: 0x00ffff,
             wireframe: true,
             transparent: true,
             opacity: 0.6,
@@ -19,10 +19,7 @@ class WireframeMaterialProvider implements IMaterialProvider {
     }
 
     getMaterial = () => this.material
-
-    releaseMaterial = () => {
-    }
-
+    releaseMaterial = () => {}
     dispose = () => {
         this.material.dispose()
     }
@@ -31,30 +28,41 @@ class WireframeMaterialProvider implements IMaterialProvider {
 export function RendererHost() {
     const bootstrap = useEngineRuntime()
     const { scene } = useThree()
-
     const frameCounter = useRef(0)
+
+    //   Setup scene reference for development
+    useEffect(() => {
+        if (import.meta.env.DEV) {
+            (window as any).__scene = scene;
+        }
+        return () => {
+            delete (window as any).__scene;
+        };
+    }, [scene]);
 
     const materialProvider = useMemo(() => new WireframeMaterialProvider(), [])
 
     // Material memory management
     useEffect(() => {
         return () => {
-        materialProvider.dispose()
+            materialProvider.dispose()
         }
     }, [materialProvider])
 
     // Attach RendererEngine when component mounts
     useEffect(() => {
+        console.log('[RendererHost] Mounted')
         bootstrap.attachRenderer(scene, materialProvider)
+        console.log('[RendererHost] Renderer attached')
 
         return () => {
             try {
-            bootstrap.detachRenderer()
+                bootstrap.detachRenderer()
             } catch (error) {
-            console.error('[RendererHost] Failed to detach RendererEngine:', error)
+                console.error('[RendererHost] Failed to detach RendererEngine:', error)
             }
         }
-    },   [bootstrap, scene, materialProvider])
+    }, [bootstrap, scene, materialProvider])
 
     //   Forward R3F frame to Bootstrap
     useFrame((threeState, delta) => {

@@ -17,6 +17,7 @@
     "ripgrep": "^0.3.1",
     "three": "^0.168.0",
     "tree-node-cli": "^3.0.0",
+    "typecheck": "^0.1.2",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

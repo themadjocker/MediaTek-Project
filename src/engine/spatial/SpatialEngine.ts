@@ -1,5 +1,4 @@
 
-
 import { Engine }                from '../core/Engine'
 import type { FrameContext }     from '../types/EngineTypes'
 import {
@@ -11,17 +10,10 @@ import {
 import type { ISceneGraphPort, PaneCreateDescriptor } from '../command/CommandTypes'
 import { MAX_PANES, MIN_PANE_SIZE } from '@constants/index'
 
-/** Runs after Command (priority 20) — nothing in this stack calls into
- *  SpatialEngine from a lower-priority engine's onUpdate, but keeping it
- *  ordered after Command documents the dependency direction even though
- *  today's flow is event-driven (Command calls createPane()/removePane()
- *  directly), not a per-frame poll. */
 export const SPATIAL_ENGINE_PRIORITY = 30
 
 export class SpatialEngine extends Engine implements ISceneGraphPort {
   private readonly nodes = new Map<string, SpatialNode>()
-  /** Insertion order, oldest first — the FIFO eviction queue at MAX_PANES.
-   *  A plain array of ids parallel to `nodes`, not a duplicate of node data. */
   private readonly insertionOrder: string[] = []
 
   constructor() {
@@ -33,10 +25,6 @@ export class SpatialEngine extends Engine implements ISceneGraphPort {
     this.insertionOrder.length = 0
   }
 
-  /** Spatial Engine is event-driven (createPane/removePane are called
-   *  directly by Command Engine's dispatch), not polled — nothing to do per
-   *  frame today. Reserved for Phase 6, if e.g. continuous manipulation ever
-   *  needs a per-frame settle/clamp pass rather than discrete moveNode() calls. */
   protected onUpdate(_frame: FrameContext): void {}
 
   protected onDispose(): void {
@@ -44,12 +32,47 @@ export class SpatialEngine extends Engine implements ISceneGraphPort {
     this.insertionOrder.length = 0
   }
 
+  // ── Fail-fast validation (SVE migration) ───────────────────────────────────
+
+  private validateNode(node: SpatialNode): void {
+    const { position, scale } = node
+
+    if (
+      !Number.isFinite(position.x) ||
+      !Number.isFinite(position.y) ||
+      !Number.isFinite(position.z)
+    ) {
+      throw new Error(
+        `[SpatialEngine] Invalid Node ${node.id} detected at insertion — position contains non-finite value (x=${position.x}, y=${position.y}, z=${position.z})`
+      )
+    }
+
+    if (
+      !Number.isFinite(scale.x) ||
+      !Number.isFinite(scale.y) ||
+      !Number.isFinite(scale.z)
+    ) {
+      throw new Error(
+        `[SpatialEngine] Invalid Node ${node.id} detected at insertion — scale contains non-finite value (x=${scale.x}, y=${scale.y}, z=${scale.z})`
+      )
+    }
+  }
+
+  public addNode(node: SpatialNode): void {
+    this.validateNode(node)
+
+    this.nodes.set(node.id, node)
+
+    // Avoid duplicate entries in insertionOrder (O(n) but rare)
+    if (!this.insertionOrder.includes(node.id)) {
+      this.insertionOrder.push(node.id)
+    }
+  }
+
   // ── ISceneGraphPort ────────────────────────────────────────────────────────
 
   public createPane(descriptor: PaneCreateDescriptor): string {
     if (this.insertionOrder.length >= MAX_PANES) {
-      // FIFO eviction — oldest pane goes to make room, mirroring the ring-
-      // buffer behavior the UI already displays a "wrapping" state for.
       const oldestId = this.insertionOrder.shift()
       if (oldestId !== undefined) {
         this.nodes.delete(oldestId)
@@ -68,8 +91,9 @@ export class SpatialEngine extends Engine implements ISceneGraphPort {
       scale,
     }
 
-    this.nodes.set(id, node)
-    this.insertionOrder.push(id)
+    // Fail-fast: validate before any Map mutation
+    this.addNode(node)
+
     this.emit(SpatialEventType.NodeAdded, { id } satisfies SpatialNodeEventPayload)
 
     return id
@@ -85,26 +109,18 @@ export class SpatialEngine extends Engine implements ISceneGraphPort {
 
   // ── Query API — for a future Renderer Engine (Phase 6) ────────────────────
 
-  /** Returns the engine's own long-lived SpatialNode object — DO NOT mutate
-   *  externally (see SpatialTypes.ts doc); read fresh fields each frame,
-   *  same contract as every other engine object in this stack. */
   public getNode(id: string): SpatialNode | undefined {
     return this.nodes.get(id)
   }
 
-  /** All current node ids, oldest first. A copy — safe to iterate while the
-   *  engine mutates its own internal state elsewhere. */
   public getAllNodeIds(): readonly string[] {
-    return [...this.insertionOrder]
+    return this.insertionOrder
   }
 
   public getNodeCount(): number {
     return this.nodes.size
   }
 
-  /** Direct children of a node — unexercised today (nothing sets parentId
-   *  yet), present for the day a grouping feature needs it. O(n) scan is
-   *  fine at MAX_PANES scale; not a hot-path method. */
   public getChildren(parentId: string): SpatialNode[] {
     const result: SpatialNode[] = []
     for (const node of this.nodes.values()) {
@@ -113,12 +129,16 @@ export class SpatialEngine extends Engine implements ISceneGraphPort {
     return result
   }
 
+  public getStatistics() {
+    return {
+      nodeCount: this.nodes.size,
+      // Return the live array reference (readonly contract) instead of spreading
+      insertionOrder: this.insertionOrder as readonly string[],
+    }
+  }
+
   // ── Transform mutation — reserved for Phase 6 ──────────────────────────────
 
-  /** Move a node to an absolute world-space position, in place. Reserved
-   *  for Phase 6: a future ScalePaneCommand/MovePaneCommand calls this from
-   *  Command Engine in response to IntentEngine's ScaleHint or a grab
-   *  gesture — this engine has no opinion on what triggered the move. */
   public moveNode(id: string, position: Readonly<Vec3Mutable>): void {
     const node = this.nodes.get(id)
     if (!node) return
@@ -141,13 +161,6 @@ export class SpatialEngine extends Engine implements ISceneGraphPort {
 
 // ─── MATH ──────────────────────────────────────────────────────────────────────
 
-/**
- * Bounding-box center + size from a PaneCreateDescriptor's 4 corners — the
- * exact same AABB derivation CoreReactor's own FrozenPane component already
- * does, kept consistent so a node's position/scale mean what a renderer
- * would expect regardless of which system (engine stack or legacy path)
- * ultimately produced them.
- */
 function boundsFromCorners(
   descriptor: PaneCreateDescriptor,
 ): { position: Vec3Mutable; scale: Vec3Mutable } {

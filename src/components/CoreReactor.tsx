@@ -39,7 +39,7 @@ import {
   type PaneDescriptor,
 }                         from '@stores/useUIStore'
 import { HandSkeleton }   from './HandSkeleton'
-
+import { RendererHost }   from '../runtime/RendererHost'
 import passthroughFrag     from '@shaders/passthrough.frag?raw'
 import thresholdFrag       from '@shaders/threshold.frag?raw'
 import crtFrag             from '@shaders/crt.frag?raw'
@@ -362,7 +362,7 @@ function Scene() {
     // ── 4b. EMA-smooth this frame's raw landmarks ──────────────────────────
     updateSmoothing(src, smoothingAlphaRef.current)
 
-    // ── 5. ̥Per-hand pinch points + distances ───────────────────────────────
+    // ── 5. Per-hand pinch points + distances ───────────────────────────────
     const leftPresent  = (handPresence[0] & 0b01) !== 0 && !isSignalLost
     const rightPresent = (handPresence[0] & 0b10) !== 0 && !isSignalLost
 
@@ -397,7 +397,7 @@ function Scene() {
     const isPinchingRight = rightPresent && rightDistSq < PINCH_THRESHOLD_SQ
     const isPinching: [boolean, boolean] = [isPinchingLeft, isPinchingRight]
 
-    // ── 6. ̥Per-hand pinch debounce (rising edge = "confirmed" this frame) ──
+    // ── 6. Per-hand pinch debounce (rising edge = "confirmed" this frame) ──
     const confirmed: [boolean, boolean] = [false, false]
     for (const h of [0, 1] as const) {
       if (isPinching[h] && armed.current[h]) {
@@ -655,6 +655,7 @@ export function CoreReactor() {
       dpr={[1, 2]}
     >
       <Scene />
+      <RendererHost />
     </Canvas>
   )
 }

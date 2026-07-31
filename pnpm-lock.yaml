@@ -32,6 +32,9 @@ importers:
       tree-node-cli:
         specifier: ^3.0.0
         version: 3.0.0
+      typecheck:
+        specifier: ^0.1.2
+        version: 0.1.2
       zustand:
         specifier: ^5.0.0
         version: 5.0.14(@types/react@18.3.31)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
@@ -916,6 +919,9 @@ packages:
 
   tunnel-rat@0.1.2:
     resolution: {integrity: sha512-lR5VHmkPhzdhrM092lI2nACsLO4QubF0/yoOhzX7c+wIpbN1GjHNzCc91QlpxBi+cnx8vVJ+Ur6vL5cEoQPFpQ==}
+
+  typecheck@0.1.2:
+    resolution: {integrity: sha512-noA7T++dtHFemmk++XgotLp47kcu8ezbvN3hUUljZvntPGDWi9Ci0c24x6onS92PxOUNZFYChH8KPXRaoCcjgQ==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -1822,6 +1828,8 @@ snapshots:
       - '@types/react'
       - immer
       - react
+
+  typecheck@0.1.2: {}
 
   typescript@5.9.3: {}
 

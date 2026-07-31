@@ -7,7 +7,6 @@ import type { ILogger } from './EngineBootstrap'
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EngineRuntimeContext = createContext<EngineBootstrap | null>(null)
-
 EngineRuntimeContext.displayName = 'EngineRuntimeContext'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -16,7 +15,6 @@ EngineRuntimeContext.displayName = 'EngineRuntimeContext'
 
 interface EngineRuntimeProviderProps {
   children: ReactNode
-  /** Optional custom logger (defaults to console) */
   logger?: ILogger
 }
 
@@ -32,19 +30,24 @@ export function EngineRuntimeProvider({
     bootstrapRef.current = new EngineBootstrap(logger)
   }
 
-  // Initialize on mount, dispose on unmount
+  useEffect(() => {
+    if (import.meta.env.DEV && bootstrapRef.current) {
+        (window as any).__bootstrap = bootstrapRef.current;
+    }
+    return () => {
+        delete (window as any).__bootstrap;
+    };
+  }, []);
+
   useEffect(() => {
     const bootstrap = bootstrapRef.current!
-
     try {
       bootstrap.initialize()
     } catch (error) {
       // Clean up any partially allocated resources
       bootstrap.dispose()
-
       throw error
     }
-
     return () => {
       bootstrap.dispose()
       bootstrapRef.current = null
@@ -64,13 +67,10 @@ export function EngineRuntimeProvider({
 
 export function useEngineRuntime(): EngineBootstrap {
   const bootstrap = useContext(EngineRuntimeContext)
-
   if (!bootstrap) {
     throw new Error(
-      'useEngineRuntime() must be used within an <EngineRuntimeProvider>. ' +
-      'Wrap your root component (SimulationVault) with it.'
+      'useEngineRuntime() must be used within an <EngineRuntimeProvider>.'
     )
   }
-
   return bootstrap
 }
